@@ -11,7 +11,7 @@ var userlist = [{
     code:123456
 }]
 server.on('request',function(request,response){
-    // console.log(request.url);
+    // var userlist;
     response.writeHead(200,'ok',{
         'Content-Type': 'application/json;charset=utf-8',
         'Access-Control-Allow-Origin':'*',
@@ -28,44 +28,55 @@ server.on('request',function(request,response){
             response.end(util.inspect(post));
         })
     }else if(request.url == '/login'){
-        // response.write('<h1>这里是登录注册页面</h1>');
         getPostBody(request,function(queryObject){
-            console.log(queryObject.phoneNumber);
-            console.log(111);
+            console.log(queryObject);
             for(var k in queryObject){
-                console.log(k);
                 var paramObject = JSON.parse(k);
-                var valueArray = ["phoneNumber", "code"]
-                for (var prop in paramObject) {
-                    // if (prop === 'phoneNumber'){
-                    //   for (let i = 0; i < userlist.length; i++) {
-                    //       if(paramObject.prop === userlist.phoneNumber){
-                    //         response.end("{responseCode:1,responseMeage:'用户注册了'}");
-                    //       } 
-                    //   }
-                    // }else{
-                    //     response.end("{responseCode:1,responseMeage:'参数有误'}");
-                    // }
-                    if(valueArray.indexOf(prop) == -1){
-                        response.end("{responseCode:1,responseMeage:'参数有误'}");
-                    }
-                }
-                for(let i=0;i<userlist.length;i++){
-                    console.log(paramObject.phoneNumber);
-                    console.log(userlist[i].phoneNumber)
-                    if(paramObject.phoneNumber == userlist[i].phoneNumber){
-                        // response.end("{responseCode:0,responseMeage:'用户注册了'}");
-                        if(paramObject.code == userlist[i].code){
-                            response.end("{responseCode:0,responseMeage:'成功登录'}");
-                        }else{
-                            response.end("{responseCode:1,responseMeage:'密码错误'}");
+                if(paramObject !={}){
+                   
+                        // console.log(userlist);
+                        var paramObject = JSON.parse(k);
+                        var valueArray = ["phoneNumber", "code"];
+                        for (var prop in paramObject) {
+                            if (valueArray.indexOf(prop) == -1) {
+                                console.log(222);
+                                response.end('{"responseCode":1,"responseMeage":"参数有误"}');
+                                return ;
+                            }
                         }
-                    }
-                }
-            }
 
-                // console.log(JSON.stringify(queryObject));
-            response.end();  
+                        // readNewsData(function (newarr) {
+                        // var userlist = newarr;
+                        for (let i = 0; i < userlist.length; i++) {
+                            console.log(paramObject.phoneNumber);
+                            console.log(userlist[i].phoneNumber)
+                            if (paramObject.phoneNumber == userlist[i].phoneNumber) {
+                                console.log(111);
+                                // response.end("{responseCode:0,responseMeage:'用户注册了'}");
+                                if (paramObject.code == userlist[i].code) {
+                                   response.write('{"responseCode":0,"responseMeage":"成功登录"}');
+                                } else {
+                                    response.end('{"responseCode":1,"responseMeage":"密码错误"}');
+                                }
+                            } else {
+                                // userlist.push(paramObject);
+                                // console.log(userlist);
+                                // var newUser={};
+                                // for(var k in paramObject){
+                                //     newUser[k]=paramObject[k]
+                                // }
+                                // userlist.push(newUser);
+                                // console.log(userlist);
+                                response.write('{"responseCode":1,"responseMeage":"用户未注册"}')
+                            }
+                        }
+                    // })
+                }else{
+                    response.end();       
+                }
+             
+            }
+            response.end();       
         })
        
     }else{
@@ -76,11 +87,11 @@ server.on('request',function(request,response){
     }
 });
 
-server.listen("4200",function(){
-    console.log("服务器已经开启,监听端口在4200,请访问:http://localhost:4200");
+server.listen("8080",function(){
+    console.log("服务器已经开启,监听端口在8080,请访问:http://localhost:8080");
 })
 
-
+// 获取post 过来的数据
 function getPostBody(req, callback) {
     var result = [];
     req.on("data", function (chunk) {
@@ -106,14 +117,16 @@ function getPostBody(req, callback) {
     })
 }
 
-// function getPostBody1(req,res,callback){
-//     var body = '';
-//     req.on("data",function(data){
-//         body+=data;
-//     })
-//     req.on('end',function(){
-//         var returnValue = querystring.parse(body);
-//         res.send(returnValue.toString());
-//         callback(returnValue);
-//     })
-// }
+
+//读取必要的数据
+function readNewsData(callback) {
+    var newsList;
+    fs.readFile(path.join(__dirname, "data.json"), "utf8", function (err, data) {
+        if (err) {
+            newsList = [];
+        } else {
+            newsList = JSON.parse(data);
+        }
+        callback(newsList);
+    })
+}
